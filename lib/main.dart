@@ -5,51 +5,40 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(App());
+  runApp(AppFirebase());
 }
 
-/// We are using a StatefulWidget such that we only create the [Future] once,
-/// no matter how many times our widget rebuild.
-/// If we used a [StatelessWidget], in the event where [App] is rebuilt, that
-/// would re-initialize FlutterFire and make our application re-enter loading state,
-/// which is undesired.
-class App extends StatefulWidget {
-  // Create the initialization Future outside of `build`:
+class AppFirebase extends StatefulWidget {
   @override
-  _AppState createState() => _AppState();
+  _AppFirebaseState createState() => _AppFirebaseState();
 }
 
-class _AppState extends State<App> {
-  /// The future is part of the state of our widget. We should not call `initializeApp`
-  /// directly inside [build].
+class _AppFirebaseState extends State<AppFirebase> {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      // Initialize FlutterFire:
-      future: _initialization,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          // Check for errors
-          return Material(
-            child: Center(
-              child: Text("Não foi possivel inicializar o Firebase!"),
-            ),
-          );
-        } else if (snapshot.connectionState == ConnectionState.done) {
-          // Once complete, show your application
-          return AppWidget();
-        } else {
-          // Otherwise, show something whilst waiting for initialization to complete
-          return Material(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Material(
               child: Center(
-            child: CircularProgressIndicator(),
-          ));
-        }
-      },
-    );
+                child: Text(
+                  "Não foi possível inicializar o Firebase",
+                  textDirection: TextDirection.ltr,
+                ),
+              ),
+            );
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            return AppWidget();
+          } else {
+            return Material(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        });
   }
 }
-
-class SomethingWentWrong {}
